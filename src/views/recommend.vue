@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { getRecommend } from '@/server/recommend'
+import { getRecommend } from '@/service/recommend'
 import Slider from '@/components/base/slider/slider'
 import Scroll from '@/components/base/scroll/scroll'
 
