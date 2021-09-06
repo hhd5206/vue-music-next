@@ -14,7 +14,7 @@ import { getSingerDetail } from '@/service/singer'
 import { processSongs } from '@/service/song'
 import MusicList from '@/components/music-list/music-list'
 import storage from 'good-storage'
-import { SINGER_KEY } from '@/assets/js/constans'
+import { SINGER_KEY } from '@/assets/js/constant'
 export default {
   name: 'singer-detail',
   props: {
