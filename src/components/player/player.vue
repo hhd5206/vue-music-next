@@ -16,14 +16,14 @@
           <div class="icon i-left">
             <i class="icon-sequence"></i>
           </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
+          <div class="icon i-left" :class="diableCls">
+            <i @click="prev" class="icon-prev"></i>
           </div>
-          <div class="icon i-center" @click="togglePlay">
-            <i :class="playIcon"></i>
+          <div class="icon i-center" :class="diableCls">
+            <i @click="togglePlay" :class="playIcon"></i>
           </div>
-          <div class="icon i-right">
-            <i class="icon-next"></i>
+          <div class="icon i-right" :class="diableCls">
+            <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon i-right">
             <i class="icon-not-favorite"></i>
@@ -32,7 +32,12 @@
       </div>
     </div>
 
-    <audio ref="audioRef" @pause="pause" @canplay="ready"></audio>
+    <audio
+      ref="audioRef"
+      @pause="pause"
+      @canplay="ready"
+      @error="error"
+    ></audio>
   </div>
 </template>
 
@@ -57,10 +62,21 @@ export default {
     const playIcon = computed(() => {
       return playing.value ? 'icon-pause' : 'icon-play'
     })
+    const currentIndex = computed(() => {
+      return store.state.currentIndex
+    })
+    const playList = computed(() => {
+      return store.state.playlist
+    })
+    const diableCls = computed(() => {
+      return songReady.value ? '' : 'disable'
+    })
+
     watch(currentSong, newSong => {
       if (!newSong.id || !newSong.url) {
         return
       }
+      songReady.value = false
       const audioEl = audioRef.value
       audioEl.src = newSong.url
       audioEl.play()
@@ -76,13 +92,64 @@ export default {
       store.commit('setFullScreen', false)
     }
     function togglePlay() {
+      if (!songReady.value) {
+        return
+      }
       store.commit('setPlayingState', !playing.value)
     }
     function pause() {
       store.commit('setPlayingState', false)
     }
     function ready() {
+      if (songReady.value) return
       songReady.value = true
+    }
+    function error() {
+      songReady.value = true
+    }
+
+    function prev() {
+      const list = playList.value
+      if (!songReady.value || !list.length) {
+        return
+      }
+      if (list.length === 1) {
+        loop()
+      } else {
+        let index = currentIndex.value - 1
+        if (index === -1) {
+          index = list.length - 1
+        }
+        store.commit('setCurrentIndex', index)
+        if (!playing.value) {
+          store.commit('setPlayingState', true)
+        }
+      }
+    }
+
+    function next() {
+      const list = playList.value
+      if (!songReady.value || !list.length) {
+        return
+      }
+      if (list.length === 1) {
+        loop()
+      } else {
+        let index = currentIndex.value + 1
+        if (index === list.length) {
+          index = 0
+        }
+        store.commit('setCurrentIndex', index)
+        if (!playing.value) {
+          store.commit('setPlayingState', true)
+        }
+      }
+    }
+
+    function loop() {
+      const audioEl = audioRef.value
+      audioEl.currentTime = 0
+      audioEl.play()
     }
     return {
       goBack,
@@ -92,7 +159,11 @@ export default {
       playIcon,
       togglePlay,
       pause,
-      ready
+      ready,
+      prev,
+      next,
+      diableCls,
+      error
     }
   }
 }
