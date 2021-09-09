@@ -26,7 +26,10 @@
             <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon i-right">
-            <i class="icon-not-favorite"></i>
+            <i
+              @click="toggleFavorite(currentSong)"
+              :class="getFavoriteIcon(currentSong)"
+            ></i>
           </div>
         </div>
       </div>
@@ -45,12 +48,16 @@
 import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
+import useFavorite from './use-favorite'
 
 export default {
   name: 'player',
   setup() {
+    // data
     const audioRef = ref(null)
     const songReady = ref(false)
+
+    // vuex
     const store = useStore()
     const fullScreen = computed(() => {
       return store.state.fullScreen
@@ -61,21 +68,26 @@ export default {
     const playing = computed(() => {
       return store.state.playing
     })
-    const playIcon = computed(() => {
-      return playing.value ? 'icon-pause' : 'icon-play'
-    })
     const currentIndex = computed(() => {
       return store.state.currentIndex
     })
     const playList = computed(() => {
       return store.state.playlist
     })
+
+    // computed
+    const playIcon = computed(() => {
+      return playing.value ? 'icon-pause' : 'icon-play'
+    })
     const diableCls = computed(() => {
       return songReady.value ? '' : 'disable'
     })
 
+    // hooks
     const { modeIcon, changeMode } = useMode()
+    const { getFavoriteIcon, toggleFavorite } = useFavorite()
 
+    // watch
     watch(currentSong, newSong => {
       if (!newSong.id || !newSong.url) {
         return
@@ -92,6 +104,8 @@ export default {
       const audioEl = audioRef.value
       newPlaying ? audioEl.play() : audioEl.pause()
     })
+
+    // methods
     function goBack() {
       store.commit('setFullScreen', false)
     }
@@ -170,7 +184,10 @@ export default {
       error,
       // mode
       modeIcon,
-      changeMode
+      changeMode,
+      // favorite
+      getFavoriteIcon,
+      toggleFavorite
     }
   }
 }
