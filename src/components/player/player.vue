@@ -12,6 +12,22 @@
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
       <div class="bottom">
+        <div class="progress-wrapper">
+          <span class="time time-l">{{ formatTime(currentTime) }}</span>
+          <div class="progress-bar-wrapper">
+            <progress-bar
+              ref="barRef"
+              :progress="progress"
+              @progress-changing="onProgressChanging"
+              @progress-changed="onProgressChanged"
+            ></progress-bar>
+          </div>
+          <span class="time time-r">
+            {{
+              formatTime(currentSong.duration)
+            }}
+          </span>
+        </div>
         <div class="operators">
           <div class="icon i-left">
             <i @click="changeMode" :class="modeIcon"></i>
@@ -26,21 +42,13 @@
             <i @click="next" class="icon-next"></i>
           </div>
           <div class="icon i-right">
-            <i
-              @click="toggleFavorite(currentSong)"
-              :class="getFavoriteIcon(currentSong)"
-            ></i>
+            <i @click="toggleFavorite(currentSong)" :class="getFavoriteIcon(currentSong)"></i>
           </div>
         </div>
       </div>
     </div>
 
-    <audio
-      ref="audioRef"
-      @pause="pause"
-      @canplay="ready"
-      @error="error"
-    ></audio>
+    <audio ref="audioRef" @pause="pause" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -49,13 +57,20 @@ import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
+import ProgressBar from './progress-bar'
+import { formatTime } from '@/assets/js/util'
 
 export default {
   name: 'player',
+  components: {
+    ProgressBar
+  },
   setup() {
     // data
     const audioRef = ref(null)
     const songReady = ref(false)
+    const currentTime = ref(0)
+    let progressChanging = false
 
     // vuex
     const store = useStore()
@@ -82,6 +97,9 @@ export default {
     const diableCls = computed(() => {
       return songReady.value ? '' : 'disable'
     })
+    const progress = computed(() => {
+      return currentTime.value / currentSong.value.duration
+    })
 
     // hooks
     const { modeIcon, changeMode } = useMode()
@@ -92,6 +110,7 @@ export default {
       if (!newSong.id || !newSong.url) {
         return
       }
+      currentTime.value = 0
       songReady.value = false
       const audioEl = audioRef.value
       audioEl.src = newSong.url
@@ -169,12 +188,33 @@ export default {
       audioEl.currentTime = 0
       audioEl.play()
     }
+
+    function updateTime(e) {
+      if (!progressChanging) {
+        currentTime.value = e.target.currentTime
+      }
+    }
+
+    function onProgressChanging(progress) {
+      progressChanging = true
+      currentTime.value = progress * currentSong.value.duration
+    }
+
+    function onProgressChanged(progress) {
+      progressChanging = false
+      audioRef.value.currentTime = currentTime.value = progress * currentSong.value.duration
+      if (!playing.value) {
+        store.commit('setPlayingState', true)
+      }
+    }
     return {
       goBack,
       fullScreen,
       currentSong,
+      currentTime,
       audioRef,
       playIcon,
+      progress,
       togglePlay,
       pause,
       ready,
@@ -182,6 +222,10 @@ export default {
       next,
       diableCls,
       error,
+      updateTime,
+      formatTime,
+      onProgressChanging,
+      onProgressChanged,
       // mode
       modeIcon,
       changeMode,
