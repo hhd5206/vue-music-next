@@ -48,7 +48,14 @@
       </div>
     </div>
 
-    <audio ref="audioRef" @pause="pause" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
+    <audio
+      ref="audioRef"
+      @pause="pause"
+      @canplay="ready"
+      @error="error"
+      @timeupdate="updateTime"
+      @ended="end"
+    ></audio>
   </div>
 </template>
 
@@ -59,6 +66,7 @@ import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
+import { PLAY_MODE } from '@/assets/js/constant'
 
 export default {
   name: 'player',
@@ -99,6 +107,9 @@ export default {
     })
     const progress = computed(() => {
       return currentTime.value / currentSong.value.duration
+    })
+    const playMode = computed(() => {
+      return store.state.playMode
     })
 
     // hooks
@@ -187,8 +198,15 @@ export default {
       const audioEl = audioRef.value
       audioEl.currentTime = 0
       audioEl.play()
+      store.commit('setPlayingState', true)
     }
-
+    function end() {
+      if (playMode.value === PLAY_MODE.loop) {
+        loop()
+      } else {
+        next()
+      }
+    }
     function updateTime(e) {
       if (!progressChanging) {
         currentTime.value = e.target.currentTime
@@ -222,6 +240,7 @@ export default {
       next,
       diableCls,
       error,
+      end,
       updateTime,
       formatTime,
       onProgressChanging,
