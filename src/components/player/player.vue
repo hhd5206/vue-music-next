@@ -11,6 +11,15 @@
         <h1 class="title">{{ currentSong.name }}</h1>
         <h2 class="subtitle">{{ currentSong.singer }}</h2>
       </div>
+      <div class="middle">
+        <div class="middle-l">
+          <div ref="cdWrapperRef" class="cd-wrapper">
+            <div ref="cdRef" class="cd">
+              <img ref="cdImageRef" class="image" :class="cdCls" :src="currentSong.pic" />
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="bottom">
         <div class="progress-wrapper">
           <span class="time time-l">{{ formatTime(currentTime) }}</span>
@@ -24,7 +33,7 @@
           </div>
           <span class="time time-r">
             {{
-              formatTime(currentSong.duration)
+            formatTime(currentSong.duration)
             }}
           </span>
         </div>
@@ -64,6 +73,7 @@ import { computed, watch, ref } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
+import useCd from './use-cd'
 import ProgressBar from './progress-bar'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
@@ -115,7 +125,7 @@ export default {
     // hooks
     const { modeIcon, changeMode } = useMode()
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
-
+    const { cdCls, cdImageRef, cdRef } = useCd()
     // watch
     watch(currentSong, newSong => {
       if (!newSong.id || !newSong.url) {
@@ -250,7 +260,11 @@ export default {
       changeMode,
       // favorite
       getFavoriteIcon,
-      toggleFavorite
+      toggleFavorite,
+      // cd
+      cdCls,
+      cdImageRef,
+      cdRef
     }
   }
 }
