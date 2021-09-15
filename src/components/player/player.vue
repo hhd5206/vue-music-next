@@ -19,6 +19,21 @@
             </div>
           </div>
         </div>
+        <scroll class="middle-r" ref="lyricScrollRef">
+          <div class="lyric-wrapper">
+            <div v-if="currentLyric" ref="lyricListRef">
+              <p
+                class="text"
+                :class="{ 'current': currentLineNum === index }"
+                v-for="(line,index) in currentLyric.lines"
+                :key="line.num"
+              >{{ line.txt }}</p>
+            </div>
+            <!-- <div class="pure-music" v-show="pureMusicLyric">
+              <p>{{ pureMusicLyric }}</p>
+            </div>-->
+          </div>
+        </scroll>
       </div>
       <div class="bottom">
         <div class="progress-wrapper">
@@ -33,7 +48,7 @@
           </div>
           <span class="time time-r">
             {{
-            formatTime(currentSong.duration)
+              formatTime(currentSong.duration)
             }}
           </span>
         </div>
@@ -74,14 +89,17 @@ import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
 import useCd from './use-cd'
+import useLyric from './use-lyric'
 import ProgressBar from './progress-bar'
+import Scroll from '@/components/base/scroll/scroll'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
 
 export default {
   name: 'player',
   components: {
-    ProgressBar
+    ProgressBar,
+    Scroll
   },
   setup() {
     // data
@@ -126,6 +144,11 @@ export default {
     const { modeIcon, changeMode } = useMode()
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
     const { cdCls, cdImageRef, cdRef } = useCd()
+    const {
+      currentLyric, currentLineNum, playLyric, stopLyric, lyricScrollRef,
+      lyricListRef
+    } = useLyric({ songReady, currentTime })
+
     // watch
     watch(currentSong, newSong => {
       if (!newSong.id || !newSong.url) {
@@ -142,7 +165,13 @@ export default {
         return
       }
       const audioEl = audioRef.value
-      newPlaying ? audioEl.play() : audioEl.pause()
+      if (newPlaying) {
+        audioEl.play()
+        playLyric()
+      } else {
+        audioEl.pause()
+        stopLyric()
+      }
     })
 
     // methods
@@ -161,6 +190,8 @@ export default {
     function ready() {
       if (songReady.value) return
       songReady.value = true
+      // 保证异步顺序下歌词能同步
+      playLyric()
     }
     function error() {
       songReady.value = true
@@ -264,7 +295,12 @@ export default {
       // cd
       cdCls,
       cdImageRef,
-      cdRef
+      cdRef,
+      // lyric
+      currentLyric,
+      currentLineNum,
+      lyricScrollRef,
+      lyricListRef
     }
   }
 }
@@ -335,7 +371,7 @@ export default {
       white-space: nowrap;
       font-size: 0;
       .middle-l {
-        display: inline-block;
+        display: none;
         vertical-align: top;
         position: relative;
         width: 100%;
