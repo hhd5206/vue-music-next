@@ -18,6 +18,9 @@
               <img ref="cdImageRef" class="image" :class="cdCls" :src="currentSong.pic" />
             </div>
           </div>
+          <div class="playing-lyric-wrapper">
+            <div class="playing-lyric">{{ playingLyric }}</div>
+          </div>
         </div>
         <scroll class="middle-r" ref="lyricScrollRef">
           <div class="lyric-wrapper">
@@ -29,9 +32,9 @@
                 :key="line.num"
               >{{ line.txt }}</p>
             </div>
-            <!-- <div class="pure-music" v-show="pureMusicLyric">
+            <div class="pure-music" v-show="pureMusicLyric">
               <p>{{ pureMusicLyric }}</p>
-            </div>-->
+            </div>
           </div>
         </scroll>
       </div>
@@ -145,7 +148,7 @@ export default {
     const { getFavoriteIcon, toggleFavorite } = useFavorite()
     const { cdCls, cdImageRef, cdRef } = useCd()
     const {
-      currentLyric, currentLineNum, playLyric, stopLyric, lyricScrollRef,
+      currentLyric, currentLineNum, pureMusicLyric, playingLyric, playLyric, stopLyric, lyricScrollRef,
       lyricListRef
     } = useLyric({ songReady, currentTime })
 
@@ -257,6 +260,8 @@ export default {
     function onProgressChanging(progress) {
       progressChanging = true
       currentTime.value = progress * currentSong.value.duration
+      playLyric()
+      stopLyric()
     }
 
     function onProgressChanged(progress) {
@@ -265,6 +270,7 @@ export default {
       if (!playing.value) {
         store.commit('setPlayingState', true)
       }
+      playLyric()
     }
     return {
       goBack,
@@ -300,7 +306,9 @@ export default {
       currentLyric,
       currentLineNum,
       lyricScrollRef,
-      lyricListRef
+      lyricListRef,
+      pureMusicLyric,
+      playingLyric
     }
   }
 }
@@ -371,7 +379,7 @@ export default {
       white-space: nowrap;
       font-size: 0;
       .middle-l {
-        display: none;
+        display: inline-block;
         vertical-align: top;
         position: relative;
         width: 100%;
