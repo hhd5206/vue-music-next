@@ -1,5 +1,5 @@
 <template>
-  <div class="player">
+  <div class="player" v-show="playList.length">
     <div class="normal-player" v-show="fullScreen">
       <div class="background">
         <img :src="currentSong.pic" />
@@ -83,7 +83,7 @@
         </div>
       </div>
     </div>
-
+    <mini-player :progress="progress" :toggle-play="togglePlay"></mini-player>
     <audio
       ref="audioRef"
       @pause="pause"
@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import useMode from './use-mode'
 import useFavorite from './use-favorite'
@@ -105,6 +105,7 @@ import useLyric from './use-lyric'
 import useMiddleInteractive from './use-middle-interactive'
 import ProgressBar from './progress-bar'
 import Scroll from '@/components/base/scroll/scroll'
+import MiniPlayer from './mini-player.vue'
 import { formatTime } from '@/assets/js/util'
 import { PLAY_MODE } from '@/assets/js/constant'
 
@@ -112,11 +113,13 @@ export default {
   name: 'player',
   components: {
     ProgressBar,
-    Scroll
+    Scroll,
+    MiniPlayer
   },
   setup() {
     // data
     const audioRef = ref(null)
+    const barRef = ref(null)
     const songReady = ref(false)
     const currentTime = ref(0)
     let progressChanging = false
@@ -193,7 +196,12 @@ export default {
         stopLyric()
       }
     })
-
+    watch(fullScreen, async (newFullScreen) => {
+      if (newFullScreen) {
+        await nextTick()
+        barRef.value.setOffset(progress.value)
+      }
+    })
     // methods
     function goBack() {
       store.commit('setFullScreen', false)
@@ -291,12 +299,14 @@ export default {
     }
     return {
       goBack,
+      barRef,
       fullScreen,
       currentSong,
       currentTime,
       audioRef,
       playIcon,
       progress,
+      playList,
       togglePlay,
       pause,
       ready,
