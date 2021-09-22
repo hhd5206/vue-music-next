@@ -1,4 +1,4 @@
-import { ref, computed, watch, nextTick, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import BScroll from '@better-scroll/core'
 import Slide from '@better-scroll/slide'
@@ -12,6 +12,7 @@ export default function useMiniSlider() {
   const fullScreen = computed(() => store.state.fullScreen)
   const playlist = computed(() => store.state.playlist)
   const sliderShow = computed(() => !fullScreen.value && !!playlist.value)
+  const currentIndex = computed(() => store.state.currentIndex)
 
   onMounted(() => {
     let sliderVal
@@ -31,13 +32,30 @@ export default function useMiniSlider() {
               loop: true
             }
           })
+          sliderVal.on('slidePageChanged', ({ pageX }) => {
+            store.commit('setCurrentIndex', pageX)
+            store.commit('setPlayingState', true)
+          })
         } else {
           sliderVal.refresh()
         }
+        sliderVal.goToPage(currentIndex.value, 0, 0)
+      }
+    })
+    // 当前播放歌曲变化时slider要对应变化
+    watch(currentIndex, newIndex => {
+      if (sliderVal && sliderShow.value) {
+        sliderVal.goToPage(newIndex, 0, 0)
       }
     })
   })
+  onUnmounted(() => {
+    if (slider.value) {
+      slider.value.destory()
+    }
+  })
   return {
-    sliderWrapperRef
+    sliderWrapperRef,
+    slider
   }
 }
