@@ -34,7 +34,6 @@ export default function useMiniSlider() {
           })
           sliderVal.on('slidePageChanged', ({ pageX }) => {
             store.commit('setCurrentIndex', pageX)
-            store.commit('setPlayingState', true)
           })
         } else {
           sliderVal.refresh()
@@ -46,6 +45,13 @@ export default function useMiniSlider() {
     watch(currentIndex, newIndex => {
       if (sliderVal && sliderShow.value) {
         sliderVal.goToPage(newIndex, 0, 0)
+      }
+    })
+    // 删除歌曲要重新刷新slider
+    watch(playlist, async () => {
+      if (sliderVal && sliderShow.value) {
+        await nextTick()
+        sliderVal.refresh()
       }
     })
   })

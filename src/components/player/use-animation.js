@@ -5,7 +5,7 @@ export default function useAnimation() {
   const cdWrapperRef = ref(null)
   let entering = false
   let leaveing = false
-  function enter({ done }) {
+  function enter(el, done) {
     if (leaveing) {
       afterLeave()
     }
@@ -34,7 +34,7 @@ export default function useAnimation() {
     animations.unregisterAnimation('move')
     cdWrapperRef.value.animation = ''
   }
-  function leave({ done }) {
+  function leave(el, done) {
     if (entering) {
       afterEnter()
     }

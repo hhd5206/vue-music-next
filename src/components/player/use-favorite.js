@@ -11,12 +11,12 @@ export default function useFavorite() {
   const maxLen = 100
 
   function getFavoriteIcon(song) {
-    return isFavrite(song) ? 'icon-favorite' : 'icon-not-favorite'
+    return isFavorite(song) ? 'icon-favorite' : 'icon-not-favorite'
   }
 
   function toggleFavorite(song) {
     let list
-    if (isFavrite(song)) {
+    if (isFavorite(song)) {
       list = remove(FAVORITE_KEY, compare)
     } else {
       list = save(song, FAVORITE_KEY, compare, maxLen)
@@ -28,7 +28,7 @@ export default function useFavorite() {
     }
   }
 
-  function isFavrite(song) {
+  function isFavorite(song) {
     return (
       favoriteList.value.findIndex(item => {
         return item.id === song.id
