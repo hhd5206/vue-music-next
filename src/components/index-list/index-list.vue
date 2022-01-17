@@ -4,12 +4,7 @@
       <li v-for="group in data" :key="group.title" class="group">
         <h2 class="title">{{ group.title }}</h2>
         <ul>
-          <li
-            v-for="item in group.list"
-            :key="item.id"
-            @click="onItemClick(item)"
-            class="item"
-          >
+          <li v-for="item in group.list" :key="item.id" @click="onItemClick(item)" class="item">
             <img class="avatar" v-lazy="item.pic" />
             <span class="name">{{ item.name }}</span>
           </li>
@@ -32,16 +27,14 @@
           :data-index="index"
           class="item"
           :class="{ current: currentIndex === index }"
-        >
-          {{ item }}
-        </li>
+        >{{ item }}</li>
       </ul>
     </div>
   </scroll>
 </template>
 
 <script>
-import Scroll from '@/components/base/scroll/scroll'
+import Scroll from '@/components/wrap-scroll'
 import useFixed from './use-fixed'
 import useShortcut from './use-shortcut'
 export default {

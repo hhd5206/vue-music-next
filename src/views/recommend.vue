@@ -15,12 +15,8 @@
                 <img width="60" height="60" v-lazy="item.pic" />
               </div>
               <div class="text">
-                <h2 class="name">
-                  {{ item.username }}
-                </h2>
-                <p class="title">
-                  {{ item.title }}
-                </p>
+                <h2 class="name">{{ item.username }}</h2>
+                <p class="title">{{ item.title }}</p>
               </div>
             </li>
           </ul>
@@ -33,7 +29,7 @@
 <script>
 import { getRecommend } from '@/service/recommend'
 import Slider from '@/components/base/slider/slider'
-import Scroll from '@/components/base/scroll/scroll'
+import Scroll from '@/components/wrap-scroll'
 
 export default {
   name: 'recommend',

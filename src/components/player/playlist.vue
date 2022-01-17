@@ -7,6 +7,9 @@
             <h1 class="title">
               <i class="icon" :class="modeIcon" @click="changeMode"></i>
               <span class="text">{{ modeText }}</span>
+              <span class="clear" @click="showConfirm">
+                <i class="icon-clear"></i>
+              </span>
             </h1>
           </div>
           <scroll ref="scrollRef" class="list-content">
@@ -36,6 +39,7 @@
             <span>关闭</span>
           </div>
         </div>
+        <confirm ref="confirmRef" @confirm="confirmClear" text="是否清空播放列表？" confirm-btn-text="清空"></confirm>
       </div>
     </transition>
   </teleport>
@@ -47,11 +51,13 @@ import { useStore } from 'vuex'
 import Scroll from '@/components/base/scroll/scroll'
 import useMode from './use-mode'
 import useFavorite from './use-favorite.js'
+import Confirm from '../base/confirm/confirm.vue'
 
 export default {
   name: 'playlist',
   components: {
-    Scroll
+    Scroll,
+    Confirm
   },
   setup() {
     const store = useStore()
@@ -60,6 +66,7 @@ export default {
     const removeing = ref(false)
     const scrollRef = ref(null)
     const listRef = ref(null)
+    const confirmRef = ref(null)
     const sequenceList = computed(() => store.state.sequenceList)
     const playlist = computed(() => store.state.playlist)
     const currentSong = computed(() => store.getters.currentSong)
@@ -112,9 +119,18 @@ export default {
       if (removeing.value) return
       removeing.value = true
       store.dispatch('removeSong', song)
+      if (!playlist.value.length) hide()
       setTimeout(() => {
         removeing.value = false
       }, 300)
+    }
+
+    function showConfirm() {
+      confirmRef.value.show()
+    }
+    function confirmClear() {
+      store.dispatch('clearSongList')
+      hide()
     }
 
     const {
@@ -130,6 +146,7 @@ export default {
       visible,
       scrollRef,
       listRef,
+      confirmRef,
       sequenceList,
       playlist,
       removeing,
@@ -138,6 +155,8 @@ export default {
       hide,
       selectItem,
       removeSong,
+      showConfirm,
+      confirmClear,
       // mode
       modeIcon,
       changeMode,

@@ -48,8 +48,8 @@ export default function useMiniSlider() {
       }
     })
     // 删除歌曲要重新刷新slider
-    watch(playlist, async () => {
-      if (sliderVal && sliderShow.value) {
+    watch(playlist, async (newList) => {
+      if (sliderVal && sliderShow.value && newList.length) {
         await nextTick()
         sliderVal.refresh()
       }

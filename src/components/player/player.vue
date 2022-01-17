@@ -135,9 +135,7 @@ export default {
 
     // vuex
     const store = useStore()
-    const fullScreen = computed(() => {
-      return store.state.fullScreen
-    })
+    const fullScreen = computed(() => store.state.fullScreen)
     const currentSong = computed(() => {
       return store.getters.currentSong
     })

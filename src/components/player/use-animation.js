@@ -32,7 +32,7 @@ export default function useAnimation() {
   function afterEnter() {
     entering = false
     animations.unregisterAnimation('move')
-    cdWrapperRef.value.animation = ''
+    cdWrapperRef.value.style.animation = ''
   }
   function leave(el, done) {
     if (entering) {
@@ -43,9 +43,9 @@ export default function useAnimation() {
     const cdWrapperEl = cdWrapperRef.value
     cdWrapperEl.style.transition = 'all .6s cubic-bezier(0.45, 0, 0.55, 1)'
     cdWrapperEl.style.transform = `translate3d(${x}px,${y}px,0) scale(${scale})`
-    cdWrapperEl.addEventListener('animationend', next)
+    cdWrapperEl.addEventListener('transitionend', next)
     function next() {
-      cdWrapperEl.removeEventListener('animationend', next)
+      cdWrapperEl.removeEventListener('transitionend', next)
       done()
     }
   }
